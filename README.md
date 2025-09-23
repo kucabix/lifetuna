@@ -30,7 +30,19 @@ yarn install
 pnpm install
 ```
 
-3. Run the development server:
+3. Set up the database:
+```bash
+# Generate Prisma client
+npx prisma generate
+
+# Run database migrations
+npx prisma migrate dev
+
+# (Optional) Open Prisma Studio to view/edit data
+npx prisma studio
+```
+
+4. Run the development server:
 ```bash
 npm run dev
 # or
@@ -41,14 +53,25 @@ pnpm dev
 bun dev
 ```
 
-4. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+5. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+
+### Database
+
+The application uses **SQLite** for development with Prisma ORM. The database file (`dev.db`) is created automatically when you run migrations.
+
+- **Prisma Studio**: Available at [http://localhost:5555](http://localhost:5555) when running `npx prisma studio`
+- **Database Schema**: Located in `prisma/schema.prisma`
+- **Migrations**: Stored in `prisma/migrations/`
+
+For production, the database can be easily migrated to PostgreSQL by updating the `DATABASE_URL` in `.env`.
 
 
 ## Future Development Steps
 
-- **Database Setup**: PostgreSQL integration with Prisma ORM
 - **LLM Integration**: AI-powered priority recommendations and analysis
+- **API Development**: RESTful endpoints for user management and tip tracking
 - **Design Improvements**: Enhanced UI/UX with modern design patterns
+- **Production Database**: Migrate from SQLite to PostgreSQL
 - **Release**: Production deployment and user onboarding
 - **Mobile App**: Native mobile application for on-the-go priority tracking
 
@@ -58,6 +81,8 @@ bun dev
 - TypeScript - Type safety
 - Tailwind CSS - Styling
 - shadcn/ui - Component library
+- [Prisma](https://prisma.io) - Database ORM
+- SQLite - Development database
 
 ## Inspiration
 
