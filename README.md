@@ -1,10 +1,10 @@
-# LifeTune
+# Lifetuna
 
-A productivity application that delivers simple, actionable tips each day to help you focus on what's truly important. LifeTune helps you organize and track your life priorities using a structured, card-based approach for personal development and goal achievement.
+A productivity application that delivers simple, actionable tips each day to help you focus on what's truly important. Lifetuna helps you organize and track your life priorities using a structured, card-based approach for personal development and goal achievement.
 
 ## About
 
-LifeTune provides daily micro-actions and insights designed to keep you moving toward your most important goals. Each day, you'll receive a few minutes of focused guidance to help you stay aligned with your priorities and make meaningful progress.
+Lifetuna provides daily micro-actions and insights designed to keep you moving toward your most important goals. Each day, you'll receive a few minutes of focused guidance to help you stay aligned with your priorities and make meaningful progress.
 
 ## Getting Started
 
