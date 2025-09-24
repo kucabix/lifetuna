@@ -1,20 +1,103 @@
 "use client";
 
-import { useState } from "react";
+import { useActionState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Tuna from "@/assets/tuna.svg";
 
-export default function LoginPage() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
-    // TODO: Implement actual login logic
-    console.log("Login attempt:", { email, password });
+interface LoginState {
+  success: boolean;
+  error: string | null;
+  fieldErrors: {
+    email?: string;
+    password?: string;
   };
+}
+
+async function loginAction(
+  _: LoginState,
+  formData: FormData
+): Promise<LoginState> {
+  const email = formData.get("email") as string;
+  const password = formData.get("password") as string;
+
+  // Client-side validation
+  const fieldErrors: { email?: string; password?: string } = {};
+
+  if (!email?.trim()) {
+    fieldErrors.email = "Email is required";
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    fieldErrors.email = "Please enter a valid email address";
+  }
+
+  if (!password?.trim()) {
+    fieldErrors.password = "Password is required";
+  }
+
+  if (Object.keys(fieldErrors).length > 0) {
+    return {
+      success: false,
+      error: null,
+      fieldErrors,
+    };
+  }
+
+  try {
+    const response = await fetch("/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    });
+
+    const data = await response.json();
+
+    if (response.ok) {
+      // Success - redirect to home
+      window.location.href = "/";
+      return {
+        success: true,
+        error: null,
+        fieldErrors: {},
+      };
+    } else {
+      // Handle different error types
+      let errorMessage = "Login failed. Please try again.";
+
+      if (response.status === 401) {
+        errorMessage = "Invalid email or password. Please try again.";
+      } else if (response.status === 400) {
+        errorMessage = data.error || "Please check your input and try again.";
+      } else if (response.status >= 500) {
+        errorMessage = "Server error. Please try again later.";
+      } else {
+        errorMessage = data.error || errorMessage;
+      }
+
+      return {
+        success: false,
+        error: errorMessage,
+        fieldErrors: {},
+      };
+    }
+  } catch (error) {
+    console.error("Login failed:", error);
+    return {
+      success: false,
+      error: "Network error. Please check your connection and try again.",
+      fieldErrors: {},
+    };
+  }
+}
+
+export default function LoginPage() {
+  const [state, formAction, isPending] = useActionState(loginAction, {
+    success: false,
+    error: null,
+    fieldErrors: {},
+  });
 
   const handleBackToHome = () => {
     window.location.href = "/";
@@ -40,19 +123,30 @@ export default function LoginPage() {
             <CardTitle>Login</CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleLogin} className="space-y-4">
+            {state.error && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-md">
+                <p className="text-sm text-red-600 m-0">{state.error}</p>
+              </div>
+            )}
+
+            <form action={formAction} className="space-y-4">
               <div className="space-y-2">
                 <label htmlFor="email" className="text-sm font-medium">
                   Email
                 </label>
                 <Input
                   id="email"
+                  name="email"
                   type="email"
                   placeholder="Enter your email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  className={state.fieldErrors.email ? "border-red-500" : ""}
                   required
                 />
+                {state.fieldErrors.email && (
+                  <p className="text-sm text-red-600">
+                    {state.fieldErrors.email}
+                  </p>
+                )}
               </div>
 
               <div className="space-y-2">
@@ -61,16 +155,21 @@ export default function LoginPage() {
                 </label>
                 <Input
                   id="password"
+                  name="password"
                   type="password"
                   placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  className={state.fieldErrors.password ? "border-red-500" : ""}
                   required
                 />
+                {state.fieldErrors.password && (
+                  <p className="text-sm text-red-600">
+                    {state.fieldErrors.password}
+                  </p>
+                )}
               </div>
 
-              <Button type="submit" className="w-full">
-                Sign In
+              <Button type="submit" className="w-full" disabled={isPending}>
+                {isPending ? "Signing In..." : "Sign In"}
               </Button>
             </form>
 
