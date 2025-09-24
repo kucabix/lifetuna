@@ -23,12 +23,19 @@ export interface LoginRequest {
 }
 
 export interface CreatePriorityRequest {
-  category: string;
+  categoryId: string;
   rank: number;
 }
 
 export interface UpdatePriorityRequest {
   rank: number;
+}
+
+export interface BulkUpdatePrioritiesRequest {
+  priorities: {
+    categoryId: string;
+    rank: number;
+  }[];
 }
 
 export interface CreateTipRequest {
@@ -66,9 +73,20 @@ export interface UserWithPrioritiesResponse extends UserResponse {
 }
 
 // Priority API responses
+export interface PriorityCategoryResponse {
+  id: string;
+  name: string;
+  title: string;
+  description: string;
+  createdAt: string;
+}
+
 export interface PriorityResponse {
   id: string;
-  category: string;
+  category: string; // category name for backward compatibility
+  categoryId: string;
+  categoryTitle: string;
+  categoryDescription: string;
   rank: number;
   createdAt: string;
 }

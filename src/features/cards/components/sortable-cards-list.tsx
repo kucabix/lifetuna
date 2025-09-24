@@ -23,13 +23,16 @@ import { Button } from "@/components/ui/button";
 interface SortableCardsListProps {
   initialCards?: CardData[];
   onContinue?: () => void;
+  onSavePriorities?: (priorities: CardData[]) => Promise<void>;
 }
 
 export function SortableCardsList({
   initialCards = [],
   onContinue,
+  onSavePriorities,
 }: SortableCardsListProps) {
   const [cards, setCards] = useState<CardData[]>(initialCards);
+  const [isSaving, setIsSaving] = useState(false);
   // Track if component has mounted on client to prevent hydration mismatch with @dnd-kit
   const [isMounted, setIsMounted] = useState(false);
 
@@ -125,13 +128,27 @@ export function SortableCardsList({
         {onContinue && (
           <div className="flex justify-center pt-4">
             <Button
-              onClick={onContinue}
+              onClick={async () => {
+                if (onSavePriorities) {
+                  setIsSaving(true);
+                  try {
+                    await onSavePriorities(cards);
+                  } catch (error) {
+                    console.error("Failed to save priorities:", error);
+                    // Still continue even if saving fails
+                  } finally {
+                    setIsSaving(false);
+                  }
+                }
+                onContinue();
+              }}
+              disabled={isSaving}
               className="px-8 py-2 bg-primary text-primary-foreground font-medium transition-all duration-300 hover:scale-105 hover:shadow-lg animate-pulse hover:animate-none"
               style={{
-                animation: "shake 3s ease-in-out infinite",
+                animation: isSaving ? "none" : "shake 3s ease-in-out infinite",
               }}
             >
-              Continue
+              {isSaving ? "Saving..." : "Continue"}
               <svg
                 className="ml-2 w-4 h-4 transition-transform duration-300 group-hover:translate-x-1"
                 fill="none"

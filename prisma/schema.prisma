@@ -27,18 +27,34 @@ model User {
   @@map("users")
 }
 
+// Priority categories (fixed set of priorities)
+model PriorityCategory {
+  id          String @id @default(cuid())
+  name        String @unique // "career", "creative", "educational", etc.
+  title       String // "Career-related activities"
+  description String // "time at work, working at home, or starting a business"
+  
+  createdAt   DateTime @default(now())
+  
+  // Relationships
+  userPriorities UserPriority[]
+  
+  @@map("priority_categories")
+}
+
 // User's priority rankings (from sortable cards)
 model UserPriority {
-  id       String @id @default(cuid())
-  userId   String
-  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id         String @id @default(cuid())
+  userId     String
+  user       User   @relation(fields: [userId], references: [id], onDelete: Cascade)
   
-  category String // "career", "creative", "educational", etc.
-  rank     Int    // 1 = highest priority, 2 = second, etc.
+  categoryId String
+  category   PriorityCategory @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  rank       Int    // 1 = highest priority, 2 = second, etc.
   
-  createdAt DateTime @default(now())
+  createdAt  DateTime @default(now())
   
-  @@unique([userId, category])
+  @@unique([userId, categoryId])
   @@map("user_priorities")
 }
 

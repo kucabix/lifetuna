@@ -6,6 +6,8 @@ import {
   UserResponse,
   CreatePriorityRequest,
   UpdatePriorityRequest,
+  BulkUpdatePrioritiesRequest,
+  PriorityCategoryResponse,
   PriorityResponse,
   CreateTipRequest,
   TipResponse,
@@ -47,6 +49,16 @@ class ApiClient {
     });
   }
 
+  async getCurrentUser(): Promise<ApiResponse<UserResponse>> {
+    return this.request("/auth/me");
+  }
+
+  async logout(): Promise<ApiResponse<null>> {
+    return this.request("/auth/logout", {
+      method: "POST",
+    });
+  }
+
   // User endpoints
   async getUserByEmail(email: string): Promise<ApiResponse<UserResponse>> {
     return this.request(`/users?email=${encodeURIComponent(email)}`);
@@ -82,6 +94,12 @@ class ApiClient {
   }
 
   // Priority endpoints
+  async getPriorityCategories(): Promise<
+    ApiResponse<PriorityCategoryResponse[]>
+  > {
+    return this.request("/priority-categories");
+  }
+
   async getUserPriorities(
     userId: string
   ): Promise<ApiResponse<PriorityResponse[]>> {
@@ -95,6 +113,16 @@ class ApiClient {
     return this.request(`/users/${userId}/priorities`, {
       method: "POST",
       body: JSON.stringify(priorityData),
+    });
+  }
+
+  async bulkUpdatePriorities(
+    userId: string,
+    prioritiesData: BulkUpdatePrioritiesRequest
+  ): Promise<ApiResponse<PriorityResponse[]>> {
+    return this.request(`/users/${userId}/priorities`, {
+      method: "PUT",
+      body: JSON.stringify(prioritiesData),
     });
   }
 

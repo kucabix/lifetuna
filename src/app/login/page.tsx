@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import Tuna from "@/assets/tuna.svg";
+import { apiClient } from "@/lib/api-client";
 
 interface LoginState {
   success: boolean;
@@ -44,17 +45,9 @@ async function loginAction(
   }
 
   try {
-    const response = await fetch("/api/auth/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email, password }),
-    });
+    const response = await apiClient.login({ email, password });
 
-    const data = await response.json();
-
-    if (response.ok) {
+    if (response.success) {
       // Success - redirect to home
       window.location.href = "/";
       return {
@@ -66,14 +59,14 @@ async function loginAction(
       // Handle different error types
       let errorMessage = "Login failed. Please try again.";
 
-      if (response.status === 401) {
+      if (response.error?.includes("Invalid email or password")) {
         errorMessage = "Invalid email or password. Please try again.";
-      } else if (response.status === 400) {
-        errorMessage = data.error || "Please check your input and try again.";
-      } else if (response.status >= 500) {
+      } else if (response.error?.includes("Invalid email format")) {
+        errorMessage = "Please check your input and try again.";
+      } else if (response.error?.includes("Server error")) {
         errorMessage = "Server error. Please try again later.";
       } else {
-        errorMessage = data.error || errorMessage;
+        errorMessage = response.error || errorMessage;
       }
 
       return {

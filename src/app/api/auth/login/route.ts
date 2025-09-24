@@ -9,6 +9,7 @@ import {
 } from "@/lib/api-utils";
 import { verifyPassword } from "@/lib/auth-utils";
 import { LoginRequest, UserResponse } from "@/types/api";
+import { cookies } from "next/headers";
 
 // POST /api/auth/login - Login user
 export async function POST(request: NextRequest) {
@@ -46,6 +47,15 @@ export async function POST(request: NextRequest) {
       createdAt: user.createdAt.toISOString(),
       updatedAt: user.updatedAt.toISOString(),
     };
+
+    // Set session cookie
+    const cookieStore = await cookies();
+    cookieStore.set("session", user.id, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 60 * 60 * 24 * 7, // 7 days
+    });
 
     return createApiResponse(userResponse, true, "Login successful");
   } catch (error) {
