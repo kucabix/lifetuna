@@ -1,10 +1,10 @@
 # Lifetuna
 
-A productivity application that delivers simple, actionable tips each day to help you focus on what's truly important. Lifetuna helps you organize and track your life priorities using a structured, card-based approach for personal development and goal achievement.
+A productivity application that delivers AI-powered, personalized tips and insights to help you focus on what's truly important. Lifetuna combines intelligent priority management with emotional intelligence to provide personalized guidance for personal development and goal achievement.
 
 ## About
 
-Lifetuna provides daily micro-actions and insights designed to keep you moving toward your most important goals. Each day, you'll receive a few minutes of focused guidance to help you stay aligned with your priorities and make meaningful progress.
+Lifetuna uses advanced AI to analyze your priorities, emotions, and goals, delivering personalized daily micro-actions and insights. The app features intelligent question generation, priority analysis, and emotionally-aware recommendations to help you stay aligned with your most important goals and make meaningful progress.
 
 ## Getting Started
 
@@ -12,6 +12,7 @@ Lifetuna provides daily micro-actions and insights designed to keep you moving t
 
 - Node.js 18+ 
 - npm, yarn, pnpm, or bun
+- Ollama (for local AI processing)
 
 ### Installation
 
@@ -30,7 +31,19 @@ yarn install
 pnpm install
 ```
 
-3. Set up the database:
+3. Install and set up Ollama (for AI features):
+```bash
+# Install Ollama
+brew install ollama
+
+# Start Ollama service
+ollama serve
+
+# Download Llama 3 model (in a new terminal)
+ollama run llama3
+```
+
+4. Set up the database:
 ```bash
 # Generate Prisma client
 npx prisma generate
@@ -42,7 +55,7 @@ npx prisma migrate dev
 npx prisma studio
 ```
 
-4. Run the development server:
+5. Run the development server:
 ```bash
 npm run dev
 # or
@@ -53,7 +66,7 @@ pnpm dev
 bun dev
 ```
 
-5. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+6. Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
 ### Database
 
@@ -68,21 +81,35 @@ For production, the database can be easily migrated to PostgreSQL by updating th
 
 ## Future Development Steps
 
-- **LLM Integration**: AI-powered priority recommendations and analysis
-- **API Development**: RESTful endpoints for user management and tip tracking
-- **Design Improvements**: Enhanced UI/UX with modern design patterns
+- **Enhanced AI Models**: Support for additional local models (Mistral, Code Llama)
+- **Advanced Analytics**: Deeper insights into user behavior and progress
+- **Mobile App**: Native mobile application for on-the-go priority tracking
 - **Production Database**: Migrate from SQLite to PostgreSQL
 - **Release**: Production deployment and user onboarding
-- **Mobile App**: Native mobile application for on-the-go priority tracking
+- **Team Features**: Collaborative priority setting and shared goals
 
 ## Tech Stack
 
-- [Next.js](https://nextjs.org) - React framework
+### Frontend & Backend
+- [Next.js](https://nextjs.org) - React framework with API routes
 - TypeScript - Type safety
 - Tailwind CSS - Styling
 - shadcn/ui - Component library
+
+### Database & ORM
 - [Prisma](https://prisma.io) - Database ORM
 - SQLite - Development database
+- PostgreSQL - Production database (planned)
+
+### AI & Machine Learning
+- [Ollama](https://ollama.ai) - Local LLM server
+- [Llama 3](https://llama.meta.com) - 8B parameter model for emotional intelligence
+- Local Processing - 100% privacy-first AI
+
+### Development Tools
+- ESLint - Code linting
+- Prettier - Code formatting
+- Prisma Studio - Database management
 
 ## Inspiration
 

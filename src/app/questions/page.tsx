@@ -6,20 +6,60 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import Tuna from "@/assets/tuna.svg";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function QuestionsPage() {
   const { user, isLoading } = useAuth();
   const [responses, setResponses] = useState<{ [key: string]: string }>({});
   const [currentQuestion, setCurrentQuestion] = useState(0);
+  const [questions, setQuestions] = useState<string[]>([]);
+  const [isGeneratingQuestions, setIsGeneratingQuestions] = useState(true);
+  const [questionsError, setQuestionsError] = useState<string | null>(null);
 
-  const questions = [
-    "What are your top 3 life priorities right now?",
-    "What would you like to achieve in the next 6 months?",
-    "What activities or relationships bring you the most joy?",
-    "What are the biggest challenges you're facing currently?",
-    "If you had unlimited time and resources, what would you focus on?",
-  ];
+  // Generate personalized questions on component mount
+  useEffect(() => {
+    const generateQuestions = async () => {
+      try {
+        setIsGeneratingQuestions(true);
+        setQuestionsError(null);
+
+        const response = await fetch("/api/llm/generate-questions", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: user?.id, // Pass user ID to fetch priorities
+          }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to generate questions");
+        }
+
+        const data = await response.json();
+
+        if (data.success && data.data.questions) {
+          setQuestions(data.data.questions);
+        } else {
+          throw new Error(data.message || "Failed to generate questions");
+        }
+      } catch (error) {
+        console.error("Error generating questions:", error);
+        setQuestionsError(
+          error instanceof Error
+            ? error.message
+            : "Failed to generate questions"
+        );
+      } finally {
+        setIsGeneratingQuestions(false);
+      }
+    };
+
+    if (user) {
+      generateQuestions();
+    }
+  }, [user]);
 
   const handleResponseChange = (questionIndex: number, value: string) => {
     setResponses((prev) => ({
@@ -47,7 +87,7 @@ export default function QuestionsPage() {
     }
   };
 
-  if (isLoading) {
+  if (isLoading || isGeneratingQuestions) {
     return (
       <main className="min-h-screen flex items-center justify-center">
         <div className="text-center">
@@ -56,7 +96,11 @@ export default function QuestionsPage() {
             height={60}
             className="text-foreground mx-auto mb-4 animate-pulse"
           />
-          <p>Loading...</p>
+          <p>
+            {isGeneratingQuestions
+              ? "Generating personalized questions..."
+              : "Loading..."}
+          </p>
         </div>
       </main>
     );
@@ -83,6 +127,26 @@ export default function QuestionsPage() {
     );
   }
 
+  // Show error state if questions failed to generate
+  if (questionsError && questions.length === 0) {
+    return (
+      <main className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <Tuna
+            width={60}
+            height={60}
+            className="text-foreground mx-auto mb-4"
+          />
+          <h1 className="text-2xl font-bold mb-4">
+            Unable to Generate Questions
+          </h1>
+          <p className="text-muted-foreground mb-4">{questionsError}</p>
+          <Button onClick={() => window.location.reload()}>Try Again</Button>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="min-h-screen bg-background">
       <header className="relative py-8">
@@ -98,6 +162,14 @@ export default function QuestionsPage() {
       </header>
 
       <section className="container mx-auto px-4 max-w-2xl">
+        {questionsError && (
+          <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-md">
+            <p className="text-sm text-yellow-800">
+              Using fallback questions. Personalized questions will be available
+              once the AI service is ready.
+            </p>
+          </div>
+        )}
         <div className="mb-6">
           <div className="flex justify-between items-center mb-2">
             <span className="text-sm text-muted-foreground">
