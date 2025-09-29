@@ -68,16 +68,37 @@ export default function QuestionsPage() {
     }));
   };
 
-  const handleNext = () => {
+  const handleNext = async () => {
     if (currentQuestion < questions.length - 1) {
       setCurrentQuestion((prev) => prev + 1);
     } else {
-      // All questions completed
-      console.log("All responses:", responses);
-      // Here you would typically save the responses to the database
-      alert(
-        "Thank you for completing the questions! Your responses have been saved."
-      );
+      // All questions completed - save to database
+      try {
+        const answers = Object.entries(responses).map(([index, answer]) => ({
+          question: questions[parseInt(index)],
+          answer: answer,
+          questionIndex: parseInt(index),
+        }));
+
+        const response = await fetch(`/api/users/${user?.id}/answers`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ answers }),
+        });
+
+        if (!response.ok) {
+          throw new Error("Failed to save answers");
+        }
+
+        alert(
+          "Thank you for completing the questions! Your responses have been saved."
+        );
+      } catch (error) {
+        console.error("Error saving answers:", error);
+        alert("Failed to save your answers. Please try again.");
+      }
     }
   };
 
@@ -203,6 +224,14 @@ export default function QuestionsPage() {
               onChange={(e) =>
                 handleResponseChange(currentQuestion, e.target.value)
               }
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  if (responses[currentQuestion]?.trim()) {
+                    handleNext();
+                  }
+                }
+              }}
               className="min-h-[120px]"
             />
 

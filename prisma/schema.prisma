@@ -23,6 +23,7 @@ model User {
   priorities UserPriority[]
   tipViews   TipView[]
   completions TipCompletion[]
+  answers   UserAnswer[]
   
   @@map("users")
 }
@@ -106,4 +107,19 @@ model TipCompletion {
   
   @@unique([userId, tipId])
   @@map("tip_completions")
+}
+
+// Store user answers to personalized questions
+model UserAnswer {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  question    String   // The question text
+  answer      String   // The user's response
+  questionIndex Int    // The index of the question in the session
+  
+  createdAt   DateTime @default(now())
+  
+  @@map("user_answers")
 }

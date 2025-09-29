@@ -59,6 +59,14 @@ export interface UpdateTipCompletionRequest {
   notes?: string;
 }
 
+export interface SaveUserAnswersRequest {
+  answers: {
+    question: string;
+    answer: string;
+    questionIndex: number;
+  }[];
+}
+
 // User API responses
 export interface UserResponse {
   id: string;
@@ -120,4 +128,13 @@ export interface TipViewResponse {
   id: string;
   tipId: string;
   viewedAt: string;
+}
+
+// User answer API responses
+export interface UserAnswerResponse {
+  id: string;
+  question: string;
+  answer: string;
+  questionIndex: number;
+  createdAt: string;
 }
